@@ -1,11 +1,13 @@
 #include <iostream>
 #include <map>
+#include <cstdint>
+#include <limits>
+#include <algorithm>
 #include "Debug.h"
 #include "Renderer.h"
-
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 void Renderer::createInstance()
 {
@@ -68,6 +70,36 @@ void Renderer::createInstance()
 	instance = vk::raii::Instance(context, create_info);
 
 	SetupDebugCallback();
+}
+
+void Renderer::SetupDebugCallback()
+{
+	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+
+	vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+
+	vk::DebugUtilsMessengerCreateInfoEXT debugInfo{ .messageSeverity = severityFlags, .messageType = messageTypeFlags, .pfnUserCallback = &DebugCallBack };
+
+	debugMessenger = instance.createDebugUtilsMessengerEXT(debugInfo);
+}
+
+vk::Bool32 Renderer::DebugCallBack(vk::DebugUtilsMessageSeverityFlagBitsEXT severity, vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+{
+	std::cout << "Validation layer: Type [" << vk::to_string(type) << "] - Message : " << pCallbackData->pMessage << std::endl;
+
+	std::println(std::cout, "Validation layer: Type [{}]", to_string(type));
+	std::println(std::cout, "Message : {}", pCallbackData->pMessage);
+
+	return vk::False;
+}
+
+void Renderer::createSurface()
+{
+	VkSurfaceKHR	_surface;
+	if (glfwCreateWindowSurface(*instance, window, nullptr, &_surface) != 0) {
+		throw std::runtime_error("failed to create window surface!");
+	}
+	surface = vk::raii::SurfaceKHR(instance, _surface);
 }
 
 bool Renderer::isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice)
@@ -146,6 +178,11 @@ void Renderer::createLogicalDevice()
 	graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);
 }
 
+void Renderer::createSwapChain()
+{
+
+}
+
 std::vector<const char*> Renderer::GetRequiredExtension()
 {
 
@@ -187,23 +224,3 @@ std::vector<const char*> Renderer::GetRequiredSwapchain()
 	return extensions2;
 }
 
-void Renderer::SetupDebugCallback()
-{
-	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags(vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
-
-	vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags(vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
-
-	vk::DebugUtilsMessengerCreateInfoEXT debugInfo{ .messageSeverity = severityFlags, .messageType = messageTypeFlags, .pfnUserCallback = &DebugCallBack};
-
-	debugMessenger = instance.createDebugUtilsMessengerEXT(debugInfo);
-}
-
-vk::Bool32 Renderer::DebugCallBack(vk::DebugUtilsMessageSeverityFlagBitsEXT severity, vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
-{
-	std::cout << "Validation layer: Type [" << vk::to_string(type) << "] - Message : " << pCallbackData->pMessage << std::endl;
-
-	std::println(std::cout, "Validation layer: Type [{}]", to_string(type ));
-	std::println(std::cout, "Message : {}", pCallbackData -> pMessage);
-	
-	return vk::False;
-}

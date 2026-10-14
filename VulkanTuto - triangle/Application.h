@@ -3,6 +3,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
+#include "Renderer.h"
 
 class Application
 {
@@ -11,6 +12,8 @@ public:
 	int height = 600;
 
 	GLFWwindow* window = nullptr;
+
+	Renderer rend;
 
 	void Init();
 	void Run();
