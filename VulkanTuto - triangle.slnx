@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="VulkanTuto - triangle/VulkanTuto - triangle.vcxproj" Id="6abca918-0dd4-401c-b811-6fa799b56729" />
+</Solution>
