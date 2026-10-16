@@ -1,10 +1,18 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_INCLUDE_VULKAN
+#include "GLFW/glfw3.h"
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan_raii.hpp"
 
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
 
 class Renderer
 {
@@ -17,6 +25,8 @@ public:
 	void createLogicalDevice();
 	void createSwapChain();
 
+	void setWindow(GLFWwindow* _window);
+
 private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
@@ -27,6 +37,13 @@ private:
 	vk::raii::SurfaceKHR surface = nullptr;
 
 	GLFWwindow* window = nullptr;
+
+	vk::Win32SurfaceCreateInfoKHR createInfo{ .hinstance = GetModuleHandle(nullptr),
+										 .hwnd = glfwGetWin32Window(window) };
+
+	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& availableFormats);
+	vk::PresentModeKHR chooseSwapPresentMode(std::vector<vk::PresentModeKHR> const& availablePresentModes);
+	vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const &capabilities);
 
 	std::vector<const char*> GetRequiredExtension();
 	std::vector<const char*> GetRequiredLayers();

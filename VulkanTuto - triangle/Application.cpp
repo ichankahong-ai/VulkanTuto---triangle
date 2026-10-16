@@ -32,7 +32,9 @@ void Application::InitWindow()
 
 void Application::InitVulkan()
 {
+	rend = new Renderer();
 
+	rend->setWindow(window);
 }
 
 void Application::DestroyWindow()
