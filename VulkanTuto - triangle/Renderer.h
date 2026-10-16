@@ -24,6 +24,7 @@ public:
 	void pickPhysicalDevice();
 	void createLogicalDevice();
 	void createSwapChain();
+	void createImageViews();
 
 	void setWindow(GLFWwindow* _window);
 
@@ -35,6 +36,13 @@ private:
 	vk::raii::Device device = nullptr;
 	vk::raii::Queue graphicsQueue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
+	vk::raii::SwapchainKHR swapChain = nullptr;
+
+	std::vector<vk::Image> swapChainImages;
+	std::vector<vk::raii::ImageView> swapChainImageViews;
+
+	vk::SurfaceFormatKHR   swapChainSurfaceFormat;
+	vk::Extent2D           swapChainExtent;
 
 	GLFWwindow* window = nullptr;
 

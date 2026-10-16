@@ -35,7 +35,15 @@ void Application::InitVulkan()
 	rend = new Renderer();
 
 	rend->setWindow(window);
-}
+
+	rend->createInstance();
+	rend->SetupDebugCallback();
+	rend->createSurface();
+	rend->pickPhysicalDevice();
+	rend->createLogicalDevice();
+	rend->createSwapChain();
+	rend->createImageViews();
+}	
 
 void Application::DestroyWindow()
 {

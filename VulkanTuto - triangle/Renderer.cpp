@@ -230,6 +230,54 @@ void Renderer::createSwapChain()
 
 	std::vector<vk::SurfaceFormatKHR> availableFormats = physicalDevice.getSurfaceFormatsKHR(*surface);
 	swapChainSurfaceFormat = chooseSwapSurfaceFormat(availableFormats);
+
+	std::vector<vk::PresentModeKHR> availablePresentModes = physicalDevice.getSurfacePresentModesKHR(*surface);
+
+	vk::SwapchainCreateInfoKHR swapChainCreateInfo{
+		.surface = *surface,
+		.minImageCount = minImageCount,
+		.imageFormat = swapChainSurfaceFormat.format,
+		.imageColorSpace = swapChainSurfaceFormat.colorSpace,
+		.imageExtent = swapChainExtent,
+		.imageArrayLayers = 1,
+		.imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+		.imageSharingMode = vk::SharingMode::eExclusive,
+		.preTransform = surfaceCapabilities.currentTransform,
+		.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+		.presentMode = chooseSwapPresentMode(availablePresentModes),
+		.clipped = true
+	};
+
+	swapChainCreateInfo.oldSwapchain = nullptr;
+
+	swapChain = vk::raii::SwapchainKHR(device, swapChainCreateInfo);
+	swapChainImages = swapChain.getImages();
+}
+
+void Renderer::createImageViews()
+{
+	assert(swapChainImageViews.empty());
+
+	vk::ImageViewCreateInfo imageViewCreateInfo{
+		.viewType = vk::ImageViewType::e2D,
+		.format = swapChainSurfaceFormat.format,
+		.subresourceRange ={vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}
+	};
+
+	imageViewCreateInfo.components = {
+		vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity
+	};
+
+	imageViewCreateInfo.subresourceRange = {
+		.aspectMask = vk::ImageAspectFlagBits::eColor,
+		.levelCount = 1,
+		.layerCount = 1
+	};
+
+	for (auto& image : swapChainImages) {
+		imageViewCreateInfo.image = image;
+		swapChainImageViews.emplace_back(device, imageViewCreateInfo);
+	}
 }
 
 void Renderer::setWindow(GLFWwindow* _window)
