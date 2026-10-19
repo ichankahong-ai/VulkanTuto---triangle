@@ -11,7 +11,9 @@ void Application::Run()
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		rend->drawFrame();
 	}
+	rend->device.waitIdle();
 }
 
 void Application::Destroy()
@@ -33,7 +35,6 @@ void Application::InitWindow()
 void Application::InitVulkan()
 {
 	rend = new Renderer();
-
 	rend->setWindow(window);
 
 	rend->createInstance();
@@ -43,7 +44,11 @@ void Application::InitVulkan()
 	rend->createLogicalDevice();
 	rend->createSwapChain();
 	rend->createImageViews();
-}	
+	rend->createGraphicsPipeline();
+	rend->createCommandPool();
+	rend->createCommandBuffer();
+	rend->createSyncObjects();
+}
 
 void Application::DestroyWindow()
 {

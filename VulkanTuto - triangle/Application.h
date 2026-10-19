@@ -10,7 +10,7 @@ public:
 
 	GLFWwindow* window = nullptr;
 
-	Renderer* rend = nullptr;
+	Renderer *rend = nullptr;
 
 	void Init();
 	void Run();

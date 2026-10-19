@@ -15,16 +15,29 @@ public:
 	void createImageViews();
 	void createGraphicsPipeline();
 	void createCommandPool();
+	void createCommandBuffer();
+	void createSyncObjects();
 
+	void recordCommandBuffer(uint32_t imageIndex);
+	void transition_image_layout(
+		uint32_t                imageIndex,
+		vk::ImageLayout         old_layout,
+		vk::ImageLayout         new_layout,
+		vk::AccessFlags2        src_access_mask,
+		vk::AccessFlags2        dst_access_mask,
+		vk::PipelineStageFlags2 src_stage_mask,
+		vk::PipelineStageFlags2 dst_stage_mask);
 
 	void setWindow(GLFWwindow* _window);
+	void drawFrame();
 
+	vk::raii::Device device = nullptr;
 private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
 	vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
-	vk::raii::Device device = nullptr;
+	
 	vk::raii::Queue graphicsQueue = nullptr;
 	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
@@ -32,6 +45,11 @@ private:
 	vk::raii::PipelineLayout pipelineLayout = nullptr;
 	vk::raii::Pipeline graphicsPipeline = nullptr;
 	vk::raii::CommandPool commandPool = nullptr;
+	vk::raii::CommandBuffer commandBuffer = nullptr;
+
+	vk::raii::Semaphore presentCompleteSemaphore = nullptr;
+	vk::raii::Semaphore renderFinishedSemaphore = nullptr;
+	vk::raii::Fence     drawFence = nullptr;
 
 	std::vector<vk::Image> swapChainImages;
 	std::vector<vk::raii::ImageView> swapChainImageViews;
@@ -43,9 +61,6 @@ private:
 
 
 	GLFWwindow* window = nullptr;
-
-	vk::Win32SurfaceCreateInfoKHR createInfo{ .hinstance = GetModuleHandle(nullptr),
-										 .hwnd = glfwGetWin32Window(window) };
 
 	[[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char>& code) const
 	{
