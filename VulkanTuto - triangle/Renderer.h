@@ -26,6 +26,7 @@ private:
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
 	vk::raii::Device device = nullptr;
 	vk::raii::Queue graphicsQueue = nullptr;
+	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
 	vk::raii::SwapchainKHR swapChain = nullptr;
 	vk::raii::PipelineLayout pipelineLayout = nullptr;
@@ -37,6 +38,9 @@ private:
 
 	vk::SurfaceFormatKHR   swapChainSurfaceFormat;
 	vk::Extent2D           swapChainExtent;
+
+	uint32_t queueIndex = ~0;
+
 
 	GLFWwindow* window = nullptr;
 
