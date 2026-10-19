@@ -1,18 +1,6 @@
 #pragma once
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
-#define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-#include "vulkan/vulkan_raii.hpp"
-
+#include "includevk.h"
 
 class Renderer
 {
@@ -25,6 +13,9 @@ public:
 	void createLogicalDevice();
 	void createSwapChain();
 	void createImageViews();
+	void createGraphicsPipeline();
+	void createCommandPool();
+
 
 	void setWindow(GLFWwindow* _window);
 
@@ -37,6 +28,9 @@ private:
 	vk::raii::Queue graphicsQueue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
 	vk::raii::SwapchainKHR swapChain = nullptr;
+	vk::raii::PipelineLayout pipelineLayout = nullptr;
+	vk::raii::Pipeline graphicsPipeline = nullptr;
+	vk::raii::CommandPool commandPool = nullptr;
 
 	std::vector<vk::Image> swapChainImages;
 	std::vector<vk::raii::ImageView> swapChainImageViews;
@@ -48,6 +42,13 @@ private:
 
 	vk::Win32SurfaceCreateInfoKHR createInfo{ .hinstance = GetModuleHandle(nullptr),
 										 .hwnd = glfwGetWin32Window(window) };
+
+	[[nodiscard]] vk::raii::ShaderModule createShaderModule(const std::vector<char>& code) const
+	{
+		vk::ShaderModuleCreateInfo createInfo{ .codeSize = code.size() * sizeof(char), .pCode = reinterpret_cast<const uint32_t*>(code.data()) };
+		vk::raii::ShaderModule shaderModule{ device, createInfo };
+		return shaderModule;
+	}
 
 	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& availableFormats);
 	vk::PresentModeKHR chooseSwapPresentMode(std::vector<vk::PresentModeKHR> const& availablePresentModes);
