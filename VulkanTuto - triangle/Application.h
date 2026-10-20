@@ -20,9 +20,6 @@ private:
 	void InitWindow();
 	void InitVulkan();
 
-	void recreateSwapChain();
-	void cleanupSwapChain();
-
 	void DestroyWindow();
 	void DestroyVulkan();
 

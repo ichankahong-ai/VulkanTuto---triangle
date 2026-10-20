@@ -521,8 +521,22 @@ void Renderer::drawFrame()
 	{
 		throw std::runtime_error("failed to wait for fence!");
 	}
-	device.resetFences(*inFlightFences[frameIndex]);
+	
 	auto [result, imageIndex] = swapChain.acquireNextImage(UINT64_MAX, *presentCompleteSemaphores[frameIndex], nullptr);
+
+	if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || framebufferResized)
+	{
+		framebufferResized = false;
+		recreateSwapChain();
+		/*return;*/
+	}
+
+	if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
+	{
+		assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
+		throw std::runtime_error("failed to acquire swap chain image!");
+	}
+	device.resetFences(*inFlightFences[frameIndex]);
 
 	commandBuffers[frameIndex].reset();
 	recordCommandBuffer(imageIndex);
@@ -548,7 +562,31 @@ void Renderer::drawFrame()
 	/*presentInfoKHR.pResults = nullptr;*/
 	result = Queue.presentKHR(presentInfoKHR);
 
+	if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR))
+	{
+		recreateSwapChain();
+	}
+	else
+	{
+		assert(result == vk::Result::eSuccess);
+	}
+
 	frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void Renderer::recreateSwapChain()
+{
+	device.waitIdle();
+
+	cleanupSwapChain();
+	createSwapChain();
+	createImageViews();
+}
+
+void Renderer::cleanupSwapChain()
+{
+	swapChainImageViews.clear();
+	swapChain = nullptr;
 }
 
 std::vector<const char*> Renderer::GetRequiredExtension()

@@ -31,12 +31,11 @@ public:
 	void setWindow(GLFWwindow* _window);
 	void drawFrame();
 
+	void recreateSwapChain();
+	void cleanupSwapChain();
+
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
-	vk::raii::SwapchainKHR swapChain = nullptr;
-
-	std::vector<vk::Image> swapChainImages;
-	std::vector<vk::raii::ImageView> swapChainImageViews;
 private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
@@ -61,12 +60,18 @@ private:
 	std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
 	std::vector<vk::raii::Fence> inFlightFences;
 
+	vk::raii::SwapchainKHR swapChain = nullptr;
+
+	std::vector<vk::Image> swapChainImages;
+	std::vector<vk::raii::ImageView> swapChainImageViews;
 	vk::SurfaceFormatKHR   swapChainSurfaceFormat;
 	vk::Extent2D           swapChainExtent;
 
 	uint32_t queueIndex = ~0;
 
 	uint32_t frameIndex = 0;
+
+	bool framebufferResized = false;
 
 	GLFWwindow* window = nullptr;
 

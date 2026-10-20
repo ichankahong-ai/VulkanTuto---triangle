@@ -50,24 +50,11 @@ void Application::InitVulkan()
 	rend->createSyncObjects();
 }
 
-void Application::recreateSwapChain()
-{
-	rend->device.waitIdle();
 
-	cleanupSwapChain();
-	rend->createSwapChain();
-	rend->createImageViews();
-}
-
-void Application::cleanupSwapChain()
-{
-	rend->swapChainImageViews.clear();
-	rend->swapChain = nullptr;
-}
 
 void Application::DestroyWindow()
 {
-	cleanupSwapChain();
+	rend->cleanupSwapChain();
 
 	glfwDestroyWindow(window);
 
