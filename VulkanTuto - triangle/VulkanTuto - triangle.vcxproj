@@ -163,7 +163,6 @@
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="compile.bat" />
     <None Include="shaders\compile.bat" />
     <None Include="shaders\shader.slang" />
   </ItemGroup>

@@ -7,6 +7,8 @@
 #include "Debug.h"
 #include "Renderer.h"
 
+constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
 void Renderer::createInstance()
 {
 
@@ -98,38 +100,6 @@ void Renderer::createSurface()
 		throw std::runtime_error("failed to create window surface!");
 	}
 	surface = vk::raii::SurfaceKHR(instance, _surface);
-
-	/*std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
-	vk::Win32SurfaceCreateInfoKHR createInfo{ .hinstance = GetModuleHandle(nullptr),
-										 .hwnd = glfwGetWin32Window(window) };
-	surface = instance.createWin32SurfaceKHR(createInfo);
-
-	uint32_t queueIndex = ~0;
-	for (uint32_t qfpIndex = 0; qfpIndex < queueFamilyProperties.size(); qfpIndex++)
-	{
-		if ((queueFamilyProperties[qfpIndex].queueFlags & vk::QueueFlagBits::eGraphics) &&
-			physicalDevice.getSurfaceSupportKHR(qfpIndex, *surface))
-		{
-			queueIndex = qfpIndex;
-			break;
-		}
-	}
-	if (queueIndex == ~0)
-	{
-		throw std::runtime_error("Could not find a queue for graphics and present -> terminating");
-	}
-
-	// query for Vulkan 1.3 features
-	vk::StructureChain<vk::PhysicalDeviceFeatures2,
-		vk::PhysicalDeviceVulkan11Features,
-		vk::PhysicalDeviceVulkan13Features,
-		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>
-		featureChain = {
-			{},
-			{.shaderDrawParameters = true},
-			{.dynamicRendering = true},
-			{.extendedDynamicState = true} 
-	};*/
 }
 
 bool Renderer::isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice)
@@ -177,37 +147,6 @@ void Renderer::pickPhysicalDevice()
 
 void Renderer::createLogicalDevice()
 {
-	/*std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
-	auto graphicsQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties, [](auto const& qfp) {return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);});
-	auto graphicsIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
-	float queuePriority = 0.5f;
-	vk::DeviceQueueCreateInfo deviceQueueCreateInfo{ .queueFamilyIndex = graphicsIndex, .queueCount = 1, .pQueuePriorities = &queuePriority };
-
-	vk::StructureChain<vk::PhysicalDeviceFeatures2,
-		vk::PhysicalDeviceVulkan11Features,
-		vk::PhysicalDeviceVulkan13Features,
-		vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>
-
-		featureChain = {
-			{},
-			{.shaderDrawParameters = true},
-			{.dynamicRendering = true},
-			{.extendedDynamicState = true}
-	};
-
-	vk::DeviceCreateInfo deviceCreateInfo{
-	.pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
-	.queueCreateInfoCount = 1,
-	.pQueueCreateInfos = &deviceQueueCreateInfo,
-	.enabledExtensionCount = static_cast<uint32_t>(GetRequiredExtension().size()),
-	.ppEnabledExtensionNames = GetRequiredExtension().data()
-	};
-
-	device = vk::raii::Device(physicalDevice, deviceCreateInfo);
-
-	graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);*/
-
-
 	// find the index of the first queue family that supports graphics
 	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
 
@@ -460,6 +399,10 @@ void Renderer::createCommandBuffer()
 	vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
 
 	commandBuffer = std::move(vk::raii::CommandBuffers(device, allocInfo).front());
+
+	/*vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = MAX_FRAMES_IN_FLIGHT };
+
+	commandBuffer = std::move(vk::raii::CommandBuffers(device, allocInfo).front());*/
 }
 
 void Renderer::createSyncObjects()

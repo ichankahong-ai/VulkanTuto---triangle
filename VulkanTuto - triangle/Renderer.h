@@ -51,6 +51,13 @@ private:
 	vk::raii::Semaphore renderFinishedSemaphore = nullptr;
 	vk::raii::Fence     drawFence = nullptr;
 
+
+	/*std::vector<vk::raii::CommandBuffer> commandBuffers;
+
+	std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
+	std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
+	std::vector<vk::raii::Fence> inFlightFences;*/
+
 	std::vector<vk::Image> swapChainImages;
 	std::vector<vk::raii::ImageView> swapChainImageViews;
 
@@ -59,6 +66,7 @@ private:
 
 	uint32_t queueIndex = ~0;
 
+	//uint32_t frameIndex = 0;
 
 	GLFWwindow* window = nullptr;
 
@@ -77,7 +85,7 @@ private:
 	std::vector<const char*> GetRequiredLayers();
 	std::vector<const char*> GetRequiredSwapchain();
 
-
+	
 
 	static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallBack(vk::DebugUtilsMessageSeverityFlagBitsEXT, vk::DebugUtilsMessageTypeFlagsEXT, const vk::DebugUtilsMessengerCallbackDataEXT*, void*);
 };
