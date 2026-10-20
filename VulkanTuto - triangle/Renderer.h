@@ -33,6 +33,10 @@ public:
 
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
+	vk::raii::SwapchainKHR swapChain = nullptr;
+
+	std::vector<vk::Image> swapChainImages;
+	std::vector<vk::raii::ImageView> swapChainImageViews;
 private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
@@ -41,7 +45,6 @@ private:
 	
 	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
-	vk::raii::SwapchainKHR swapChain = nullptr;
 	vk::raii::PipelineLayout pipelineLayout = nullptr;
 	vk::raii::Pipeline graphicsPipeline = nullptr;
 	vk::raii::CommandPool commandPool = nullptr;
@@ -57,9 +60,6 @@ private:
 	std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
 	std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
 	std::vector<vk::raii::Fence> inFlightFences;
-
-	std::vector<vk::Image> swapChainImages;
-	std::vector<vk::raii::ImageView> swapChainImageViews;
 
 	vk::SurfaceFormatKHR   swapChainSurfaceFormat;
 	vk::Extent2D           swapChainExtent;
