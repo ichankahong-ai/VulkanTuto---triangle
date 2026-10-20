@@ -49,8 +49,9 @@
     <None Include="compile.bat">
       <Filter>Fichiers sources</Filter>
     </None>
-    <None Include="shader.slang">
-      <Filter>shaders</Filter>
+    <None Include="shaders\shader.slang" />
+    <None Include="shaders\compile.bat">
+      <Filter>Fichiers sources</Filter>
     </None>
   </ItemGroup>
 </Project>

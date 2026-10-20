@@ -31,6 +31,7 @@ public:
 	void setWindow(GLFWwindow* _window);
 	void drawFrame();
 
+	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
 private:
 	vk::raii::Context context;
@@ -38,7 +39,6 @@ private:
 	vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
 	
-	vk::raii::Queue graphicsQueue = nullptr;
 	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
 	vk::raii::SwapchainKHR swapChain = nullptr;
@@ -77,7 +77,6 @@ private:
 	std::vector<const char*> GetRequiredLayers();
 	std::vector<const char*> GetRequiredSwapchain();
 
-	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 
 
 	static VKAPI_ATTR vk::Bool32 VKAPI_CALL DebugCallBack(vk::DebugUtilsMessageSeverityFlagBitsEXT, vk::DebugUtilsMessageTypeFlagsEXT, const vk::DebugUtilsMessengerCallbackDataEXT*, void*);

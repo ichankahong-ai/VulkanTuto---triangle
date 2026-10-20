@@ -177,7 +177,7 @@ void Renderer::pickPhysicalDevice()
 
 void Renderer::createLogicalDevice()
 {
-	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+	/*std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
 	auto graphicsQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties, [](auto const& qfp) {return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);});
 	auto graphicsIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
 	float queuePriority = 0.5f;
@@ -205,10 +205,10 @@ void Renderer::createLogicalDevice()
 
 	device = vk::raii::Device(physicalDevice, deviceCreateInfo);
 
-	graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);
+	graphicsQueue = vk::raii::Queue(device, graphicsIndex, 0);*/
 
 
-	/*// find the index of the first queue family that supports graphics
+	// find the index of the first queue family that supports graphics
 	std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
 
 	for (uint32_t qfpIndex = 0; qfpIndex < queueFamilyProperties.size(); qfpIndex++)
@@ -238,17 +238,19 @@ void Renderer::createLogicalDevice()
 			{.extendedDynamicState = true}         // vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT
 	};
 
+	std::vector<const char*> requiredDeviceExtension = { vk::KHRSwapchainExtensionName };
+
 	// create a Device
 	float                     queuePriority = 0.5f;
 	vk::DeviceQueueCreateInfo deviceQueueCreateInfo{ .queueFamilyIndex = queueIndex, .queueCount = 1, .pQueuePriorities = &queuePriority };
 	vk::DeviceCreateInfo      deviceCreateInfo{ .pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
 											   .queueCreateInfoCount = 1,
 											   .pQueueCreateInfos = &deviceQueueCreateInfo,
-											   .enabledExtensionCount = static_cast<uint32_t>(GetRequiredExtension().size()),
-											   .ppEnabledExtensionNames = GetRequiredExtension().data()};
+											   .enabledExtensionCount = static_cast<uint32_t>(requiredDeviceExtension.size()),
+											   .ppEnabledExtensionNames = requiredDeviceExtension.data()};
 
 	device = vk::raii::Device(physicalDevice, deviceCreateInfo);
-	Queue = vk::raii::Queue(device, queueIndex, 0);*/
+	Queue = vk::raii::Queue(device, queueIndex, 0);
 }
 
 
@@ -305,6 +307,7 @@ void Renderer::createSwapChain()
 	swapChainSurfaceFormat = chooseSwapSurfaceFormat(availableFormats);
 
 	std::vector<vk::PresentModeKHR> availablePresentModes = physicalDevice.getSurfacePresentModesKHR(*surface);
+	
 
 	vk::SwapchainCreateInfoKHR swapChainCreateInfo{
 		.surface = *surface,
@@ -355,12 +358,12 @@ void Renderer::createImageViews()
 
 static std::vector<char> readFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
-	std::vector<char> buffer(file.tellg());
 
 	if (!file.is_open()) {
 		throw std::runtime_error("failed to open file!");
 	}
 
+	std::vector<char> buffer(file.tellg());
 	file.seekg(0, std::ios::beg);
 	file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
 
@@ -371,7 +374,7 @@ static std::vector<char> readFile(const std::string& filename) {
 
 void Renderer::createGraphicsPipeline()
 {
-	auto shaderCode = readFile("shaders/slang.spv");
+	/*auto shaderCode = readFile("shaders/slang.spv");*/
 	vk::raii::ShaderModule shaderModule = createShaderModule(readFile("shaders/slang.spv"));
 
 	vk::PipelineShaderStageCreateInfo vertShaderStageInfo{ .stage = vk::ShaderStageFlagBits::eVertex, .module = shaderModule,  .pName = "vertMain" };
@@ -616,7 +619,7 @@ std::vector<const char*> Renderer::GetRequiredLayers()
 
 std::vector<const char*> Renderer::GetRequiredSwapchain()
 {
-	uint32_t glfwExtensionCount2 = 0;
+	/*uint32_t glfwExtensionCount2 = 0;
 	auto glfwExtensions2 = glfwGetRequiredInstanceExtensions(&glfwExtensionCount2);
 
 	std::vector<char const*> requiredExtensions2 = { vk::KHRSwapchainExtensionName };
@@ -625,6 +628,9 @@ std::vector<const char*> Renderer::GetRequiredSwapchain()
 
 	extensions2.append_range(requiredExtensions2);
 
-	return extensions2;
+	return extensions2;*/
+
+	std::vector<char const*> requiredExtensions2 = { vk::KHRSwapchainExtensionName };
+	return requiredExtensions2;
 }
 
