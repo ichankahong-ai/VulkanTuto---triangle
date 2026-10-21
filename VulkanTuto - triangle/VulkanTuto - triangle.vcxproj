@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="IncludeG.h" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="VulkanTuto - triangle.cpp" />
   </ItemGroup>

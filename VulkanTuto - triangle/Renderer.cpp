@@ -1,9 +1,4 @@
-#include <iostream>
-#include <map>
-#include <cstdint>
-#include <limits>
-#include <algorithm>
-#include <fstream>
+#include "IncludeG.h"
 #include "Debug.h"
 #include "Renderer.h"
 
@@ -326,7 +321,15 @@ void Renderer::createGraphicsPipeline()
 
 	vk::PipelineDynamicStateCreateInfo dynamicState{ .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()), .pDynamicStates = dynamicStates.data() };
 	
-	vk::PipelineVertexInputStateCreateInfo vertexInputInfo;
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescription = Vertex::getAttributeDescriptions();
+
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
+		.vertexBindingDescriptionCount = 1,
+		.pVertexBindingDescriptions = &bindingDescription,
+		.vertexAttributeDescriptionCount = static_cast <uint32_t>(attributeDescription.size()),
+		.pVertexAttributeDescriptions = attributeDescription.data()
+	};
 
 	vk::PipelineInputAssemblyStateCreateInfo inputAssembly{ .topology = vk::PrimitiveTopology::eTriangleList };
 
@@ -394,6 +397,42 @@ void Renderer::createCommandPool()
 	commandPool = vk::raii::CommandPool(device, poolInfo);
 }
 
+void Renderer::createVertexBuffer()
+{
+	vk::BufferCreateInfo bufferInfo{
+		.size = sizeof(vertices[0]) * vertices.size(),
+		.usage = vk::BufferUsageFlagBits::eVertexBuffer,
+		.sharingMode = vk::SharingMode::eExclusive
+	};
+	vertexBuffer = vk::raii::Buffer(device, bufferInfo);
+
+	vk::MemoryRequirements memRequirements = vertexBuffer.getMemoryRequirements();
+	vk::MemoryAllocateInfo memoryAllocateInfo{
+	.allocationSize = memRequirements.size,
+	.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) };
+
+	vertexBufferMemory = vk::raii::DeviceMemory(device, memoryAllocateInfo);
+	vertexBuffer.bindMemory(*vertexBufferMemory, 0);
+
+	void* data = vertexBufferMemory.mapMemory(0, bufferInfo.size);
+	memcpy(data, vertices.data(), bufferInfo.size);
+	vertexBufferMemory.unmapMemory();
+}
+
+uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) {
+	vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+	{
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+
+	throw std::runtime_error("failed to find suitable memory type!");
+}
+
 void Renderer::createCommandBuffers()
 {
 	/*vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
@@ -459,8 +498,8 @@ void Renderer::recordCommandBuffer(uint32_t imageIndex)
 
 	commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(swapChainExtent.width), static_cast<float>(swapChainExtent.height), 0.0f, 1.0f));
 	commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), swapChainExtent));
-
-	commandBuffer.draw(3, 1, 0, 0);
+	commandBuffer.bindVertexBuffers(0, *vertexBuffer, { 0 });
+	commandBuffer.draw(static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
 	commandBuffer.endRendering();
 

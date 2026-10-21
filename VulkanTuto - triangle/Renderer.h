@@ -1,6 +1,33 @@
 #pragma once
 
 #include "includevk.h"
+#include "IncludeG.h"
+
+struct Vertex {
+	glm::vec2 pos;
+	glm::vec3 color;
+
+	static vk::VertexInputBindingDescription getBindingDescription()
+	{
+		return { .binding = 0, .stride = sizeof(Vertex), .inputRate = vk::VertexInputRate::eVertex };
+	}
+
+	static std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions()
+	{
+		return { {{.location = 0, .binding = 0, .format = vk::Format::eR32G32Sfloat, .offset = offsetof(Vertex, pos)},
+				 {.location = 1, .binding = 0, .format = vk::Format::eR32G32B32Sfloat, .offset = offsetof(Vertex, color)}} };
+	}
+};
+
+const std::vector<Vertex> vertices = {
+	{{0.0f, -0.5f},{0.157f, 1.0f, 0.522f}},
+	{{0.5f, 0.5f},{0.408f, 0.03f, 0.03f}},
+	{{-0.5f, 0.5f},{0.408f, 0.03f, 0.03f}}
+};
+
+//    float3(0.157, 1.0, 0.522),
+//    float3(0.408, 0.03, 0.03),
+//    float3(0.408, 0.03, 0.03)
 
 class Renderer
 {
@@ -15,6 +42,7 @@ public:
 	void createImageViews();
 	void createGraphicsPipeline();
 	void createCommandPool();
+	void createVertexBuffer();
 	void createCommandBuffers();
 	void createSyncObjects();
 
@@ -55,7 +83,8 @@ private:
 	/*vk::raii::Semaphore presentCompleteSemaphore = nullptr;
 	vk::raii::Semaphore renderFinishedSemaphore = nullptr;*/
 	/*vk::raii::Fence     drawFence = nullptr;*/
-
+	vk::raii::Buffer vertexBuffer = nullptr;
+	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
 
 	std::vector<vk::raii::CommandBuffer> commandBuffers;
 
@@ -87,6 +116,8 @@ private:
 	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(std::vector<vk::SurfaceFormatKHR> const& availableFormats);
 	vk::PresentModeKHR chooseSwapPresentMode(std::vector<vk::PresentModeKHR> const& availablePresentModes);
 	vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const &capabilities);
+
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
 	std::vector<const char*> GetRequiredExtension();
 	std::vector<const char*> GetRequiredLayers();
