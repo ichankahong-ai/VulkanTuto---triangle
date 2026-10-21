@@ -19,6 +19,12 @@ struct Vertex {
 	}
 };
 
+struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
+
 const std::vector<Vertex> vertices = {
 	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
@@ -45,10 +51,14 @@ public:
 	void createLogicalDevice();
 	void createSwapChain();
 	void createImageViews();
+	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createCommandPool();
 	void createVertexBuffer();
 	void createIndexBuffer();
+	void createUniformBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
 	void createCommandBuffers();
 	void createSyncObjects();
 
@@ -70,6 +80,8 @@ public:
 
 	void copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size);
 
+	void updateUniformBuffer(uint32_t currentImage);
+
 	bool framebufferResized = false;
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
@@ -83,6 +95,7 @@ private:
 	
 	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
+	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
 	vk::raii::PipelineLayout pipelineLayout = nullptr;
 	vk::raii::Pipeline graphicsPipeline = nullptr;
 	vk::raii::CommandPool commandPool = nullptr;
@@ -96,6 +109,15 @@ private:
 
 	vk::raii::Buffer       indexBuffer = nullptr;
 	vk::raii::DeviceMemory indexBufferMemory = nullptr;
+
+	vk::raii::DescriptorPool descriptorPool = nullptr;
+
+
+	std::vector<vk::raii::DescriptorSet> descriptorSets;
+
+	std::vector<vk::raii::Buffer>       uniformBuffers;
+	std::vector<vk::raii::DeviceMemory> uniformBuffersMemory;
+	std::vector<void*>                 uniformBuffersMapped;
 
 	std::vector<vk::raii::CommandBuffer> commandBuffers;
 

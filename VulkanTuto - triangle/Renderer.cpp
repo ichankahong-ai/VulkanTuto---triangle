@@ -290,6 +290,14 @@ void Renderer::createImageViews()
 	}
 }
 
+void Renderer::createDescriptorSetLayout()
+{
+	vk::DescriptorSetLayoutBinding uboLayoutBinding{
+			.binding = 0, .descriptorType = vk::DescriptorType::eUniformBuffer, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eVertex };
+	vk::DescriptorSetLayoutCreateInfo layoutInfo{ .bindingCount = 1, .pBindings = &uboLayoutBinding };
+	descriptorSetLayout = vk::raii::DescriptorSetLayout(device, layoutInfo);
+}
+
 static std::vector<char> readFile(const std::string& filename) {
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
@@ -342,7 +350,7 @@ void Renderer::createGraphicsPipeline()
 													.rasterizerDiscardEnable = vk::False,
 													.polygonMode = vk::PolygonMode::eFill,
 													.cullMode = vk::CullModeFlagBits::eBack,
-													.frontFace = vk::FrontFace::eClockwise,
+													.frontFace = vk::FrontFace::eCounterClockwise,
 													.depthBiasEnable = vk::False,
 													.lineWidth = 1.0f };
 
@@ -364,7 +372,7 @@ void Renderer::createGraphicsPipeline()
 
 
 
-	vk::PipelineLayoutCreateInfo pipelineLayoutInfo{ .setLayoutCount = 0, .pushConstantRangeCount = 0 };
+	vk::PipelineLayoutCreateInfo pipelineLayoutInfo{ .setLayoutCount = 1, .pSetLayouts = &*descriptorSetLayout, .pushConstantRangeCount = 0 };
 
 	pipelineLayout = vk::raii::PipelineLayout(device, pipelineLayoutInfo);
 
@@ -440,6 +448,48 @@ void Renderer::createIndexBuffer()
 		createBuffer(bufferSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
 
 	copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+}
+
+void Renderer::createUniformBuffers()
+{
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+		auto [buffer, bufferMem] = createBuffer(
+			bufferSize, vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
+		uniformBuffers.emplace_back(std::move(buffer));
+		uniformBuffersMemory.emplace_back(std::move(bufferMem));
+		uniformBuffersMapped.emplace_back(uniformBuffersMemory.back().mapMemory(0, bufferSize));
+	}
+}
+
+void Renderer::createDescriptorPool()
+{
+	vk::DescriptorPoolSize       poolSize{ .type = vk::DescriptorType::eUniformBuffer, .descriptorCount = MAX_FRAMES_IN_FLIGHT };
+	vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
+	descriptorPool = vk::raii::DescriptorPool(device, poolInfo);
+}
+
+void Renderer::createDescriptorSets()
+{
+	std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *descriptorSetLayout);
+	vk::DescriptorSetAllocateInfo        allocInfo{ .descriptorPool = descriptorPool,
+												   .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
+												   .pSetLayouts = layouts.data() };
+
+	descriptorSets = device.allocateDescriptorSets(allocInfo);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vk::DescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers[i], .offset = 0, .range = sizeof(UniformBufferObject) };
+		vk::WriteDescriptorSet   descriptorWrite{ .dstSet = descriptorSets[i],
+												 .dstBinding = 0,
+												 .dstArrayElement = 0,
+												 .descriptorCount = 1,
+												 .descriptorType = vk::DescriptorType::eUniformBuffer,
+												 .pBufferInfo = &bufferInfo };
+		device.updateDescriptorSets(descriptorWrite, {});
+	}
 }
 
 uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) {
@@ -519,10 +569,11 @@ void Renderer::recordCommandBuffer(uint32_t imageIndex)
 	commandBuffer.beginRendering(renderingInfo);
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
 
-	commandBuffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(swapChainExtent.width), static_cast<float>(swapChainExtent.height), 0.0f, 1.0f));
+	commandBuffer.setViewport(0, vk::Viewport(0.0f, static_cast<float>(swapChainExtent.height), static_cast<float>(swapChainExtent.width), -static_cast<float>(swapChainExtent.height), 0.0f, 1.0f));
 	commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), swapChainExtent));
 	commandBuffer.bindVertexBuffers(0, *vertexBuffer, { 0 });
 	commandBuffer.bindIndexBuffer(*indexBuffer, 0, vk::IndexTypeValue<decltype(indices)::value_type>::value);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, *descriptorSets[frameIndex], nullptr);
 	commandBuffer.drawIndexed(static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
 	commandBuffer.endRendering();
@@ -599,6 +650,8 @@ void Renderer::drawFrame()
 		assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
+	updateUniformBuffer(frameIndex);
+
 	device.resetFences(*inFlightFences[frameIndex]);
 
 	commandBuffers[frameIndex].reset();
@@ -671,6 +724,22 @@ void Renderer::copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuff
 	commandCopyBuffer.end();
 	Queue.submit(vk::SubmitInfo{ .commandBufferCount = 1, .pCommandBuffers = &*commandCopyBuffer }, nullptr);
 	Queue.waitIdle();
+}
+
+void Renderer::updateUniformBuffer(uint32_t currentImage)
+{
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+	UniformBufferObject ubo{};
+	ubo.model = rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.proj =
+		glm::perspective(glm::radians(45.0f), static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height), 0.1f, 10.0f);
+
+	memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
  
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int width, int height)

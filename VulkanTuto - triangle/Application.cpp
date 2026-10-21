@@ -48,10 +48,14 @@ void Application::InitVulkan()
 	rend->createLogicalDevice();
 	rend->createSwapChain();
 	rend->createImageViews();
+	rend->createDescriptorSetLayout();
 	rend->createGraphicsPipeline();
 	rend->createCommandPool();
 	rend->createVertexBuffer();
 	rend->createIndexBuffer();
+	rend->createUniformBuffers();
+	rend->createDescriptorPool();
+	rend->createDescriptorSets();
 	rend->createCommandBuffers();
 	rend->createSyncObjects();
 }
