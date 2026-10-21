@@ -576,6 +576,16 @@ void Renderer::drawFrame()
 
 void Renderer::recreateSwapChain()
 {
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window, &width, &height);
+	while ((width == 0 || height == 0) && !glfwWindowShouldClose(window)) {
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
+	if (glfwWindowShouldClose(window)) {
+		return;
+	}
+
 	device.waitIdle();
 
 	cleanupSwapChain();
@@ -587,6 +597,12 @@ void Renderer::cleanupSwapChain()
 {
 	swapChainImageViews.clear();
 	swapChain = nullptr;
+}
+ 
+void Renderer::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+	auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+	app->framebufferResized = true;
 }
 
 std::vector<const char*> Renderer::GetRequiredExtension()

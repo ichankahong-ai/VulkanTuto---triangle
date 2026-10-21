@@ -30,7 +30,11 @@ void Application::InitWindow()
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(width, height, "hello triangle", nullptr, nullptr);
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, rend->framebufferResizeCallback);
 }
+
+
 
 void Application::InitVulkan()
 {

@@ -34,8 +34,11 @@ public:
 	void recreateSwapChain();
 	void cleanupSwapChain();
 
+	bool framebufferResized = false;
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
+
+	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
@@ -71,7 +74,6 @@ private:
 
 	uint32_t frameIndex = 0;
 
-	bool framebufferResized = false;
 
 	GLFWwindow* window = nullptr;
 
