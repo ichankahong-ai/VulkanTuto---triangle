@@ -51,6 +51,7 @@ void Application::InitVulkan()
 	rend->createGraphicsPipeline();
 	rend->createCommandPool();
 	rend->createVertexBuffer();
+	rend->createIndexBuffer();
 	rend->createCommandBuffers();
 	rend->createSyncObjects();
 }
