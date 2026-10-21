@@ -397,26 +397,32 @@ void Renderer::createCommandPool()
 	commandPool = vk::raii::CommandPool(device, poolInfo);
 }
 
+std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Renderer::createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
+{
+	vk::BufferCreateInfo   bufferInfo{ .size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive };
+	vk::raii::Buffer       buffer = vk::raii::Buffer(device, bufferInfo);
+	vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
+	vk::MemoryAllocateInfo allocInfo{ .allocationSize = memRequirements.size, .memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties) };
+	vk::raii::DeviceMemory bufferMemory = vk::raii::DeviceMemory(device, allocInfo);
+	buffer.bindMemory(*bufferMemory, 0);
+	return { std::move(buffer), std::move(bufferMemory) };
+}
+
 void Renderer::createVertexBuffer()
 {
-	vk::BufferCreateInfo bufferInfo{
-		.size = sizeof(vertices[0]) * vertices.size(),
-		.usage = vk::BufferUsageFlagBits::eVertexBuffer,
-		.sharingMode = vk::SharingMode::eExclusive
-	};
-	vertexBuffer = vk::raii::Buffer(device, bufferInfo);
+	vk::DeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	
+	auto [stagingBuffer, stagingBufferMemory] =
+		createBuffer(bufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
-	vk::MemoryRequirements memRequirements = vertexBuffer.getMemoryRequirements();
-	vk::MemoryAllocateInfo memoryAllocateInfo{
-	.allocationSize = memRequirements.size,
-	.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent) };
+	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
+	memcpy(data, vertices.data(), bufferSize);
+	stagingBufferMemory.unmapMemory();
 
-	vertexBufferMemory = vk::raii::DeviceMemory(device, memoryAllocateInfo);
-	vertexBuffer.bindMemory(*vertexBufferMemory, 0);
+	std::tie(vertexBuffer, vertexBufferMemory) =
+		createBuffer(bufferSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-	void* data = vertexBufferMemory.mapMemory(0, bufferInfo.size);
-	memcpy(data, vertices.data(), bufferInfo.size);
-	vertexBufferMemory.unmapMemory();
+	copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 }
 
 uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties) {
@@ -636,6 +642,17 @@ void Renderer::cleanupSwapChain()
 {
 	swapChainImageViews.clear();
 	swapChain = nullptr;
+}
+
+void Renderer::copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size)
+{
+	vk::CommandBufferAllocateInfo allocInfo{ .commandPool = commandPool, .level = vk::CommandBufferLevel::ePrimary, .commandBufferCount = 1 };
+	vk::raii::CommandBuffer commandCopyBuffer = std::move(device.allocateCommandBuffers(allocInfo).front());
+	commandCopyBuffer.begin({ .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+	commandCopyBuffer.copyBuffer(*srcBuffer, *dstBuffer, vk::BufferCopy(0, 0, size));
+	commandCopyBuffer.end();
+	Queue.submit(vk::SubmitInfo{ .commandBufferCount = 1, .pCommandBuffers = &*commandCopyBuffer }, nullptr);
+	Queue.waitIdle();
 }
  
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int width, int height)

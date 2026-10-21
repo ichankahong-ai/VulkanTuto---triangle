@@ -62,6 +62,8 @@ public:
 	void recreateSwapChain();
 	void cleanupSwapChain();
 
+	void copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size);
+
 	bool framebufferResized = false;
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
 	vk::raii::Device device = nullptr;
@@ -118,6 +120,7 @@ private:
 	vk::Extent2D chooseSwapExtent(vk::SurfaceCapabilitiesKHR const &capabilities);
 
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
 
 	std::vector<const char*> GetRequiredExtension();
 	std::vector<const char*> GetRequiredLayers();
