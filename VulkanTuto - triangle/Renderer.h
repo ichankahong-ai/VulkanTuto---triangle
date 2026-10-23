@@ -54,6 +54,7 @@ public:
 	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createCommandPool();
+	void createTextureImage();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();
@@ -81,6 +82,11 @@ public:
 	void copyBuffer(vk::raii::Buffer& srcBuffer, vk::raii::Buffer& dstBuffer, vk::DeviceSize size);
 
 	void updateUniformBuffer(uint32_t currentImage);
+	void transitionImageLayout(vk::raii::CommandBuffer& commandBuffer, const vk::raii::Image& image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+	void copyBufferToImage(vk::raii::CommandBuffer& commandBuffer, const vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height);
+
+	vk::raii::CommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(vk::raii::CommandBuffer&& commandBuffer);
 
 	bool framebufferResized = false;
 	bool isDeviceSuitable(vk::raii::PhysicalDevice const& physicalDevice);
@@ -92,7 +98,6 @@ private:
 	vk::raii::Instance instance = nullptr;
 	vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
-	
 	vk::raii::Queue Queue = nullptr;
 	vk::raii::SurfaceKHR surface = nullptr;
 	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
@@ -100,18 +105,14 @@ private:
 	vk::raii::Pipeline graphicsPipeline = nullptr;
 	vk::raii::CommandPool commandPool = nullptr;
 	vk::raii::CommandBuffer commandBuffer = nullptr;
-
-	/*vk::raii::Semaphore presentCompleteSemaphore = nullptr;
-	vk::raii::Semaphore renderFinishedSemaphore = nullptr;*/
-	/*vk::raii::Fence     drawFence = nullptr;*/
+	vk::raii::Image        textureImage = nullptr;
+	vk::raii::DeviceMemory textureImageMemory = nullptr;
 	vk::raii::Buffer vertexBuffer = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
-
 	vk::raii::Buffer       indexBuffer = nullptr;
 	vk::raii::DeviceMemory indexBufferMemory = nullptr;
-
 	vk::raii::DescriptorPool descriptorPool = nullptr;
-
+	vk::raii::SwapchainKHR swapChain = nullptr;
 
 	std::vector<vk::raii::DescriptorSet> descriptorSets;
 
@@ -124,8 +125,6 @@ private:
 	std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
 	std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
 	std::vector<vk::raii::Fence> inFlightFences;
-
-	vk::raii::SwapchainKHR swapChain = nullptr;
 
 	std::vector<vk::Image> swapChainImages;
 	std::vector<vk::raii::ImageView> swapChainImageViews;
@@ -152,6 +151,7 @@ private:
 
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
+	std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling, vk::ImageUsageFlags usage, vk::MemoryPropertyFlags properties);
 
 	std::vector<const char*> GetRequiredExtension();
 	std::vector<const char*> GetRequiredLayers();

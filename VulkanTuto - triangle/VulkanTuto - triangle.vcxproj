@@ -155,6 +155,7 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="IncludeG.h" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="STB.cpp" />
     <ClCompile Include="VulkanTuto - triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +167,9 @@
   <ItemGroup>
     <None Include="shaders\compile.bat" />
     <None Include="shaders\shader.slang" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\texture.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

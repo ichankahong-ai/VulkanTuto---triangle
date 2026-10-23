@@ -51,6 +51,7 @@ void Application::InitVulkan()
 	rend->createDescriptorSetLayout();
 	rend->createGraphicsPipeline();
 	rend->createCommandPool();
+	rend->createTextureImage();
 	rend->createVertexBuffer();
 	rend->createIndexBuffer();
 	rend->createUniformBuffers();
