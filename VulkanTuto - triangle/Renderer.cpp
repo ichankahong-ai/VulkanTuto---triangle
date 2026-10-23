@@ -270,9 +270,11 @@ void Renderer::createImageViews()
 
 void Renderer::createDescriptorSetLayout()
 {
-	vk::DescriptorSetLayoutBinding uboLayoutBinding{
-			.binding = 0, .descriptorType = vk::DescriptorType::eUniformBuffer, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eVertex };
-	vk::DescriptorSetLayoutCreateInfo layoutInfo{ .bindingCount = 1, .pBindings = &uboLayoutBinding };
+	std::array<vk::DescriptorSetLayoutBinding, 2> bindings{
+			{{.binding = 0, .descriptorType = vk::DescriptorType::eUniformBuffer, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eVertex},
+			 {.binding = 1, .descriptorType = vk::DescriptorType::eCombinedImageSampler, .descriptorCount = 1, .stageFlags = vk::ShaderStageFlagBits::eFragment}} };
+
+	vk::DescriptorSetLayoutCreateInfo layoutInfo{ .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data() };
 	descriptorSetLayout = vk::raii::DescriptorSetLayout(device, layoutInfo);
 }
 
@@ -409,7 +411,7 @@ std::pair<vk::raii::Image, vk::raii::DeviceMemory> Renderer::createImage(uint32_
 void Renderer::createTextureImage()
 {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load("textures/hamku.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	vk::DeviceSize imageSize = texWidth * texHeight * 4;
 
 	if (!pixels)
@@ -551,8 +553,12 @@ void Renderer::createUniformBuffers()
 
 void Renderer::createDescriptorPool()
 {
-	vk::DescriptorPoolSize       poolSize{ .type = vk::DescriptorType::eUniformBuffer, .descriptorCount = MAX_FRAMES_IN_FLIGHT };
-	vk::DescriptorPoolCreateInfo poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, .maxSets = MAX_FRAMES_IN_FLIGHT, .poolSizeCount = 1, .pPoolSizes = &poolSize };
+	std::array<vk::DescriptorPoolSize, 2> poolSize{ {{.type = vk::DescriptorType::eUniformBuffer, .descriptorCount = MAX_FRAMES_IN_FLIGHT},
+														{.type = vk::DescriptorType::eCombinedImageSampler, .descriptorCount = MAX_FRAMES_IN_FLIGHT}} };
+	vk::DescriptorPoolCreateInfo          poolInfo{ .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+												   .maxSets = MAX_FRAMES_IN_FLIGHT,
+												   .poolSizeCount = static_cast<uint32_t>(poolSize.size()),
+												   .pPoolSizes = poolSize.data() };
 	descriptorPool = vk::raii::DescriptorPool(device, poolInfo);
 }
 
@@ -568,12 +574,20 @@ void Renderer::createDescriptorSets()
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
 		vk::DescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers[i], .offset = 0, .range = sizeof(UniformBufferObject) };
-		vk::WriteDescriptorSet   descriptorWrite{ .dstSet = descriptorSets[i],
-												 .dstBinding = 0,
-												 .dstArrayElement = 0,
-												 .descriptorCount = 1,
-												 .descriptorType = vk::DescriptorType::eUniformBuffer,
-												 .pBufferInfo = &bufferInfo };
+		vk::DescriptorImageInfo  imageInfo{ .sampler = textureSampler, .imageView = textureImageView, .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal };
+
+		std::array<vk::WriteDescriptorSet, 2>   descriptorWrite{ {{.dstSet = descriptorSets[i],
+														 .dstBinding = 0,
+														 .dstArrayElement = 0,
+														 .descriptorCount = 1,
+														 .descriptorType = vk::DescriptorType::eUniformBuffer,
+														 .pBufferInfo = &bufferInfo},
+														{.dstSet = descriptorSets[i],
+														 .dstBinding = 1,
+														 .dstArrayElement = 0,
+														 .descriptorCount = 1,
+														 .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+														 .pImageInfo = &imageInfo}} };
 		device.updateDescriptorSets(descriptorWrite, {});
 	}
 }
