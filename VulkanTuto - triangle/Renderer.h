@@ -3,6 +3,10 @@
 #include "includevk.h"
 #include "IncludeG.h"
 
+
+const float couleur = 1.0f;
+const float nocouleur = 0.0f;
+
 struct Vertex {
 	glm::vec3 pos;
 	glm::vec3 color;
@@ -30,35 +34,35 @@ struct UniformBufferObject {
 };
 
 const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //top
-	{{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //top
+	{{0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{-0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}},
 
-	{{-0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //side1
-	{{-0.5f, -0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{-0.5f, 0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //side1
+	{{-0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{-0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{-0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}},
 
-	{{0.5f, -0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //side2
-	{{0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{0.5f, 0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //side2
+	{{0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}},
 
-	{{-0.5f, -0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //side3
-	{{-0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{0.5f, -0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //side3
+	{{-0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{0.5f, -0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}},
 
-	{{0.5f, 0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //side4
-	{{0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, -0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //side4
+	{{0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{-0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{-0.5f, 0.5f, 0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}},
 
-	{{-0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //bottom
-	{{0.5f, -0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-	{{0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, -1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
+	{{-0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 0.0f}}, //bottom
+	{{0.5f, 0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 0.0f}},
+	{{0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {1.0f, 1.0f}},
+	{{-0.5f, -0.5f, -0.5f}, {couleur, nocouleur, nocouleur }, {0.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices = {
