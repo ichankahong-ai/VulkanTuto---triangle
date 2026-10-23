@@ -55,6 +55,8 @@ public:
 	void createGraphicsPipeline();
 	void createCommandPool();
 	void createTextureImage();
+	void createTextureImageView();
+	void createTextureSampler();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();
@@ -86,6 +88,7 @@ public:
 	void copyBufferToImage(vk::raii::CommandBuffer& commandBuffer, const vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height);
 
 	vk::raii::CommandBuffer beginSingleTimeCommands();
+	vk::raii::ImageView createImageView(vk::Image const& image, vk::Format format);
 	void endSingleTimeCommands(vk::raii::CommandBuffer&& commandBuffer);
 
 	bool framebufferResized = false;
@@ -107,6 +110,8 @@ private:
 	vk::raii::CommandBuffer commandBuffer = nullptr;
 	vk::raii::Image        textureImage = nullptr;
 	vk::raii::DeviceMemory textureImageMemory = nullptr;
+	vk::raii::ImageView textureImageView = nullptr;
+	vk::raii::Sampler      textureSampler = nullptr;
 	vk::raii::Buffer vertexBuffer = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
 	vk::raii::Buffer       indexBuffer = nullptr;
