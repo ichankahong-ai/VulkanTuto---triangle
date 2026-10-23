@@ -64,6 +64,7 @@ public:
 	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createCommandPool();
+	void createDepthResources();
 	void createTextureImage();
 	void createTextureImageView();
 	void createTextureSampler();
@@ -77,13 +78,14 @@ public:
 
 	void recordCommandBuffer(uint32_t imageIndex);
 	void transition_image_layout(
-		uint32_t                imageIndex,
+		vk::Image               imageIndex,
 		vk::ImageLayout         old_layout,
 		vk::ImageLayout         new_layout,
 		vk::AccessFlags2        src_access_mask,
 		vk::AccessFlags2        dst_access_mask,
 		vk::PipelineStageFlags2 src_stage_mask,
-		vk::PipelineStageFlags2 dst_stage_mask);
+		vk::PipelineStageFlags2 dst_stage_mask,
+		vk::ImageAspectFlags    image_aspect_flags);
 
 	void setWindow(GLFWwindow* _window);
 	void drawFrame();
@@ -98,7 +100,10 @@ public:
 	void copyBufferToImage(vk::raii::CommandBuffer& commandBuffer, const vk::raii::Buffer& buffer, vk::raii::Image& image, uint32_t width, uint32_t height);
 
 	vk::raii::CommandBuffer beginSingleTimeCommands();
-	vk::raii::ImageView createImageView(vk::Image const& image, vk::Format format);
+	vk::raii::ImageView createImageView(vk::Image const& image, vk::Format format, vk::ImageAspectFlags aspectFlags);
+	vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features);
+	vk::Format findDepthFormat();
+
 	void endSingleTimeCommands(vk::raii::CommandBuffer&& commandBuffer);
 
 	bool framebufferResized = false;
@@ -128,6 +133,10 @@ private:
 	vk::raii::DeviceMemory indexBufferMemory = nullptr;
 	vk::raii::DescriptorPool descriptorPool = nullptr;
 	vk::raii::SwapchainKHR swapChain = nullptr;
+
+	vk::raii::Image        depthImage = nullptr;
+	vk::raii::DeviceMemory depthImageMemory = nullptr;
+	vk::raii::ImageView    depthImageView = nullptr;
 
 	std::vector<vk::raii::DescriptorSet> descriptorSets;
 

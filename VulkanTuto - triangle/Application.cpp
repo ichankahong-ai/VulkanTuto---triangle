@@ -51,6 +51,7 @@ void Application::InitVulkan()
 	rend->createDescriptorSetLayout();
 	rend->createGraphicsPipeline();
 	rend->createCommandPool();
+	rend->createDepthResources();
 	rend->createTextureImage();
 	rend->createTextureImageView();
 	rend->createTextureSampler();
