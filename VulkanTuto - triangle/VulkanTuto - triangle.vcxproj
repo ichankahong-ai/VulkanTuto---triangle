@@ -151,25 +151,48 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="Debug.cpp" />
-    <ClCompile Include="IncludeG.h" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="STB.cpp" />
-    <ClCompile Include="VulkanTuto - triangle.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="Debug.h" />
-    <ClInclude Include="includevk.h" />
-    <ClInclude Include="Renderer.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="shaders\compile.bat" />
     <None Include="shaders\shader.slang" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\texture.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Renderer\Application.cpp" />
+    <ClCompile Include="Renderer\Buffers.cpp" />
+    <ClCompile Include="Renderer\Commands.cpp" />
+    <ClCompile Include="Renderer\Debug.cpp" />
+    <ClCompile Include="Renderer\DepthBuffer.cpp" />
+    <ClCompile Include="Renderer\Descriptors.cpp" />
+    <ClCompile Include="Renderer\Pipeline.cpp" />
+    <ClCompile Include="Renderer\Renderer.cpp" />
+    <ClCompile Include="Renderer\STB.cpp" />
+    <ClCompile Include="Renderer\Swapchain.cpp" />
+    <ClCompile Include="Renderer\SyncObjects.cpp" />
+    <ClCompile Include="Renderer\Texture.cpp" />
+    <ClCompile Include="Renderer\VulkanDevice.cpp" />
+    <ClCompile Include="Renderer\VulkanInstance.cpp" />
+    <ClCompile Include="Renderer\VulkanTuto - triangle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Renderer\Application.h" />
+    <ClInclude Include="Renderer\Mesh.h" />
+    <ClInclude Include="Renderer\Buffers.h" />
+    <ClInclude Include="Renderer\Commands.h" />
+    <ClInclude Include="Renderer\Constants.h" />
+    <ClInclude Include="Renderer\Debug.h" />
+    <ClInclude Include="Renderer\DepthBuffer.h" />
+    <ClInclude Include="Renderer\Descriptors.h" />
+    <ClInclude Include="Renderer\IncludeG.h" />
+    <ClInclude Include="Renderer\includevk.h" />
+    <ClInclude Include="Renderer\Pipeline.h" />
+    <ClInclude Include="Renderer\Renderer.h" />
+    <ClInclude Include="Renderer\Swapchain.h" />
+    <ClInclude Include="Renderer\SyncObjects.h" />
+    <ClInclude Include="Renderer\Texture.h" />
+    <ClInclude Include="Renderer\Vertex.h" />
+    <ClInclude Include="Renderer\VulkanDevice.h" />
+    <ClInclude Include="Renderer\VulkanInstance.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
