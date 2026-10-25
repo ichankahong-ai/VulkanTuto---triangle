@@ -1,8 +1,10 @@
-## Installation
+## Lancement
 
 1. Télécharger le projet
 2. Extraire le dossier release
 4. Entrer dans le dossier et lancer le fichier exécutable `VulkanTuto - triangle.exe`
+
+Un cube constituer de 6 face ayant tous la même image, coloré en rouge et qui tourne s'affiche sur une fenêtre
 
 ## Les fonctionnalités
 #### Initialisation et affichage
@@ -18,7 +20,7 @@
 
 #### Textures
 - Une texture se charge depuis un fichier avec stb_image
-- L'image s'affiche sur le cube
+- L'image s'affiche sur les éléments qui constituent le cube
 
 
 #### Profondeur
@@ -36,3 +38,7 @@
 
 #### Gestion de la fenêtre et arrêt
 - La fenêtre ne peut pas être redimensionner
+
+## Installation
+
+- Le projet nécessite l'installation de VulkanSDK (la version 1.4.357.0) sur windows 
